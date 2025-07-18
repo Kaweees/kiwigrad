@@ -23,6 +23,11 @@ pub const UnaryType = enum {
     }
 };
 
+// pub const UnaryOp = struct {
+//     type: UnaryType,
+//     func: fn (Scalar) Scalar,
+// };
+
 pub const BinaryType = enum {
     add,
     sub,
@@ -40,4 +45,5 @@ pub const BinaryType = enum {
 };
 
 pub const Scalar = @import("scalar.zig").Scalar;
-// pub const Tensor = @import("tensor.zig").Tensor;
+pub const Array = @import("tensor.zig").Array;
+pub const Tensor = @import("tensor.zig").Tensor;

@@ -14,17 +14,23 @@ pub fn main() !void {
     const NeuronType = kiwigrad.nn.Neuron(f64);
     const LayerType = kiwigrad.nn.Layer(f64);
     const MLPType = kiwigrad.nn.MLP(f64);
+    const ArrayType = kiwigrad.engine.Array(f64);
+    const TensorType = kiwigrad.engine.Tensor(f64);
 
     // Initialize allocators and components
     ValueType.init(alloc);
     NeuronType.init(alloc);
     LayerType.init(alloc);
     MLPType.init(alloc);
+    ArrayType.init(alloc);
+    TensorType.init(alloc);
     defer {
         ValueType.deinit();
         NeuronType.deinit();
         LayerType.deinit();
         MLPType.deinit();
+        ArrayType.deinit();
+        TensorType.deinit();
     }
 
     var sizes = [_]usize{ 3, 2, 1 };
@@ -49,6 +55,9 @@ pub fn main() !void {
             _ = o.draw_graph("assets/img/perceptron");
         }
     }
+
+    const t1 = TensorType.new(&[_]f64{ 1, 2, 3, 4 });
+    std.debug.print("t1: {d:.4}\n", .{t1.data[0].data});
 
     // // outputs now contains 2 ValueType pointers (one for each neuron)
     // print("Layer output: {d:.4}\n", .{output.data});
