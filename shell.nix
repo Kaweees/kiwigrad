@@ -1,11 +1,13 @@
-{ pkgs ? import <nixpkgs> { } }:
+{
+  pkgs ? import <nixpkgs> { },
+}:
 
 pkgs.mkShell {
   buildInputs = with pkgs; [
-    zig # Zig compiler
-    graphviz # Graphviz
+    zig_0_14 # Zig compiler 0.14.1
+    nixfmt # Nix formatter
     just # Just runner
-    nixfmt-classic # Nix formatter
+    graphviz # Graphviz
   ];
 
   # Shell hook to set up environment

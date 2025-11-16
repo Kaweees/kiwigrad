@@ -1,24 +1,31 @@
 *
 
 !.github/
+!.github/**
 !assets/
-!assets/**/
+!assets/**
 !.editorconfig
 !.gitattributes
 !.gitignore
+!.gitmodules
 !.justfile
 !.zigversion
 !LICENSE
 !README.md
 
-!src/
-!src/**/
 !examples/
+!examples/**
+!src/
+!src/**
 
 !*.md
+!*.mdc
 !*.svg
 !*.png
 !*.nix
 !*.lock
+!*.yaml
+!*.yml
+!*.sh
 !*.zig
 !*.zon

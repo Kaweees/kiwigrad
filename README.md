@@ -15,11 +15,11 @@
 </div>
 
 <a href="https://github.com/Kaweees/kiwigrad">
-  <img alt="Zig Logo" src="assets/img/zig.svg" align="right" width="150">
+    <img alt="Zig Logo" src="assets/img/zig.svg" align="right" width="150">
 </a>
 
 <div align="left">
-  <h1><em><a href="https://github.com/Kaweees/kiwigrad">~kiwigrad</a></em></h1>
+    <h1><em><a href="https://github.com/Kaweees/kiwigrad">~kiwigrad</a></em></h1>
 </div>
 
 <!-- ABOUT THE PROJECT -->
@@ -35,14 +35,8 @@ A scalar-valued automatic differentiation (autograd) engine for deep learning wr
 ## Preview
 
 <p align="center">
-  <img src="assets/img/mlp.png"
-  width = "80%"
-  alt = "MLP"
-  />
-  <img src="assets/img/perceptron.png"
-  width = "80%"
-  alt = "Perceptron"
-  />
+    <img src="assets/img/mlp.png" width = "80%" alt = "MLP" />
+    <img src="assets/img/perceptron.png" width = "80%" alt = "Perceptron" />
 </p>
 
 <!-- GETTING STARTED -->
@@ -58,29 +52,29 @@ To get a local copy of the project up and running on your machine, follow these 
 
 1. Clone the project repository
 
-   ```sh
-   git clone https://github.com/Kaweees/kiwigrad.git
-   cd kiwigrad
-   ```
+    ```sh
+    git clone https://github.com/Kaweees/kiwigrad.git
+    cd kiwigrad
+    ```
 
 2. Install the project dependencies
 
-   ```sh
-   nix-shell --max-jobs $(nproc) # Linux / Windows (WSL)
-   nix-shell --max-jobs $(sysctl -n hw.ncpu) # macOS
-   ```
+    ```sh
+    nix-shell --max-jobs $(nproc) # Linux / Windows (WSL)
+    nix-shell --max-jobs $(sysctl -n hw.ncpu) # macOS
+    ```
 
 3. Build the project
 
-   ```sh
-   just build
-   ```
+    ```sh
+    just build
+    ```
 
 4. Run the project
 
-   ```sh
-   just run
-   ```
+    ```sh
+    just run
+    ```
 
 ### Add as a dependency
 
@@ -88,30 +82,30 @@ To include `kiwigrad` in your Zig project, follow these steps:
 
 1. Add to your `build.zig.zon` file via `zig fetch`:
 
-   ```sh
-   zig fetch --save git+https://github.com/Kaweees/kiwigrad.git
-   ```
+    ```sh
+    zig fetch --save git+https://github.com/Kaweees/kiwigrad.git
+    ```
 
 2. Add the following line to your `build.zig` file:
 
-   ```zig
-   const kiwigrad = @import("kiwigrad");
+    ```zig
+    const kiwigrad = @import("kiwigrad");
 
-   pub fn build(b: *std.Build) void {
-      // exe setup...
+    pub fn build(b: *std.Build) void {
+        // exe setup...
 
-      const KiwiGrad_dep = b.dependency("kiwigrad", .{
-         .target = target,
-         .optimize = optimize,
-      });
+        const KiwiGrad_dep = b.dependency("kiwigrad", .{
+            .target = target,
+            .optimize = optimize,
+        });
 
-      const KiwiGrad_module = KiwiGrad_dep.module("kiwigrad");
-      exe.root_module.addImport("kiwigrad", KiwiGrad_module);
+        const KiwiGrad_module = KiwiGrad_dep.module("kiwigrad");
+        exe.root_module.addImport("kiwigrad", KiwiGrad_module);
 
-      // additional build steps...
-   }
+        // additional build steps...
+    }
 
-   ```
+    ```
 
 ## Usage
 

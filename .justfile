@@ -33,13 +33,14 @@ test:
 # Remove build artifacts and non-essential files
 clean:
   @echo "Cleaning..."
-  @rm -rf .zig-cache zig-out
+  @find . -type d -name ".zig-cache" -exec rm -rf {} +
+  @find . -type d -name "zig-out" -exec rm -rf {} +
 
 # Format the project
 format:
   @echo "Formatting..."
   @zig fmt .
-  @nixfmt .
+  @find . -name "*.nix" -type f -exec nixfmt {} \;
 
 # Generate documentation
 docs:
