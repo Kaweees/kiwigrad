@@ -11,24 +11,24 @@ alias d := docs
 
 # Default command when 'just' is run without arguments
 default:
-  @just --list
+  @just --list -u
 
 # Build the project
-build:
+build *args="":
   @echo "Building..."
-  @zig build
+  @zig build --fetch --summary all {{args}}
 
 # Run a package
-run:
+run *args="":
   @echo "Running..."
-  @zig build run -Doptimize=ReleaseFast
+  @zig build run -Doptimize=ReleaseFast {{args}}
   @dot -Tpng assets/img/mlp.dot -o assets/img/mlp.png
   @dot -Tpng assets/img/perceptron.dot -o assets/img/perceptron.png
 
 # Test the project
-test:
+test *args="":
   @echo "Testing..."
-  @zig build test --summary all
+  @zig build test --summary all {{args}}
 
 # Remove build artifacts and non-essential files
 clean:
