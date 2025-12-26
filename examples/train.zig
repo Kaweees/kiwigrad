@@ -47,10 +47,11 @@ pub fn main() !void {
 
     mlp.draw_graph("assets/img/mlp");
 
+    var output: []*ValueType = undefined;
     for (inputs) |in| {
         // Forward pass through the layer
-        const output = mlp.forward(@constCast(&in));
-        std.debug.print("{d:7.4} ", .{output[0].data});
+        output = mlp.forward(@constCast(&in));
+        std.debug.print("Layer output: {d:7.4}\n", .{output[0].data});
         for (output) |o| {
             _ = o.draw_graph("assets/img/perceptron");
         }
@@ -59,14 +60,15 @@ pub fn main() !void {
     const t1 = TensorType.new(&[_]f64{ 1, 2, 3, 4 });
     std.debug.print("t1: {d:.4}\n", .{t1.data[0].data});
 
-    // // outputs now contains 2 ValueType pointers (one for each neuron)
-    // print("Layer output: {d:.4}\n", .{output.data});
+    // outputs now contains 1 ValueType pointer (final layer has 1 neuron)
+    const final_output = output[0];
+    std.debug.print("Layer output: {d:.4}\n", .{final_output.data});
 
-    // print("output.data: {d:.4}\n", .{output.data});
-    // print("output.grad: {d:.4}\n", .{output.grad});
+    std.debug.print("output.data: {d:.4}\n", .{final_output.data});
+    std.debug.print("output.grad: {d:.4}\n", .{final_output.grad});
 
-    // output.backwardPass(alloc);
+    final_output.backwardPass(alloc);
 
-    // print("output.data: {d:.4}\n", .{output.data});
-    // print("output.grad: {d:.4}\n", .{output.grad});
+    std.debug.print("output.data: {d:.4}\n", .{final_output.data});
+    std.debug.print("output.grad: {d:.4}\n", .{final_output.grad});
 }
