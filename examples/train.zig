@@ -4,7 +4,6 @@
 
 const std = @import("std");
 const kiwigrad = @import("kiwigrad");
-const zbench = @import("zbench");
 
 pub fn main() !void {
     const alloc = std.heap.page_allocator;
@@ -14,23 +13,17 @@ pub fn main() !void {
     const NeuronType = kiwigrad.nn.Neuron(f64);
     const LayerType = kiwigrad.nn.Layer(f64);
     const MLPType = kiwigrad.nn.MLP(f64);
-    const ArrayType = kiwigrad.engine.Array(f64);
-    const TensorType = kiwigrad.engine.Tensor(f64);
 
     // Initialize allocators and components
     ValueType.init(alloc);
     NeuronType.init(alloc);
     LayerType.init(alloc);
     MLPType.init(alloc);
-    ArrayType.init(alloc);
-    TensorType.init(alloc);
     defer {
         ValueType.deinit();
         NeuronType.deinit();
         LayerType.deinit();
         MLPType.deinit();
-        ArrayType.deinit();
-        TensorType.deinit();
     }
 
     var sizes = [_]usize{ 3, 2, 1 };
