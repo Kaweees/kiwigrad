@@ -37,20 +37,8 @@ pub fn Scalar(comptime T: type) type {
 
         const Expr = union(engine.ExprType) {
             nop: void,
-            unary: struct {
-                /// The unary operation that produced the value
-                op: engine.UnaryType,
-                backprop_fn: BackpropFn,
-                /// The children used to compute the value
-                prev: [1]*Self,
-            },
-            binary: struct {
-                /// The binary operation that produced the value
-                op: engine.BinaryType,
-                backprop_fn: BackpropFn,
-                /// The children used to compute the value
-                prev: [2]*Self,
-            },
+            unary: engine.UnaryOp(Self),
+            binary: engine.BinaryOp(Self),
         };
 
         /// The value
@@ -177,7 +165,7 @@ pub fn Scalar(comptime T: type) type {
 
         /// Backpropagation function for ReLU
         fn relu_back(self: *Self) void {
-            self.expr.unary.prev[0].grad += if (self.data > 0) self.grad else @as(T, 0);
+            self.expr.unary.prev[0].grad += if (self.expr.unary.prev[0].data > 0) self.grad else @as(T, 0);
         }
 
         /// Apply the softmax function to a Scalar
@@ -303,6 +291,14 @@ pub fn Scalar(comptime T: type) type {
             // Apply chain rule
             self.grad = @as(T, 1);
 
+            // Zero gradients only on intermediate computation nodes (not leaf nodes, not the loss node)
+            // Leaf nodes (parameters/inputs with .nop) preserve their gradients to allow accumulation
+            for (topo.items) |node| {
+                if (node.expr != .nop and node != self) {
+                    node.grad = @as(T, 0);
+                }
+            }
+
             // Reverse the topo list and call backward on each node
             const items = topo.items;
             var i = items.len;
@@ -324,8 +320,8 @@ pub fn Scalar(comptime T: type) type {
             const file_writer = file.writer();
             graph.draw_dot(file_writer, std.heap.page_allocator) catch unreachable;
 
-            std.debug.print("Computational graph written to {s}\n", .{dot_name});
-            std.debug.print("You can visualize it by running: dot -Tpng {s} -o {s}\n", .{ dot_name, png_name });
+            // std.debug.print("Computational graph written to {s}\n", .{dot_name});
+            // std.debug.print("You can visualize it by running: dot -Tpng {s} -o {s}\n", .{ dot_name, png_name });
         }
     };
 }
