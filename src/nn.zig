@@ -61,42 +61,28 @@ pub fn Neuron(comptime T: type) type {
             return env.rNormal(@as(T, -1), @as(T, 1)) catch @as(T, 0);
         }
 
-        // /// Get all parameters (weights and bias) for optimization
-        // pub fn parameters(self: *Self) []*ValueType {
-        //     var params = arena.allocator().alloc(*ValueType, self.nin + 1) catch unreachable;
+        /// Update parameters using gradient descent
+        pub fn update_parameters(self: *Self, learning_rate: T) void {
+            for (self.weights) |weight| {
+                weight.data -= learning_rate * weight.grad;
+            }
+            self.bias.data -= learning_rate * self.bias.grad;
+        }
 
-        //     // Copy weights
-        //     for (self.weights, 0..) |weight, i| {
-        //         params[i] = weight;
-        //     }
+        /// Get the number of parameters
+        pub fn num_parameters(self: *Self) usize {
+            return self.nin + 1; // weights + bias
+        }
 
-        //     // Add bias
-        //     params[self.nin] = self.bias;
-        //     return params;
-        // }
-
-        // /// Update parameters using gradient descent
-        // pub fn update_parameters(self: *Self, learning_rate: T) void {
-        //     for (self.weights) |weight| {
-        //         weight.data -= learning_rate * weight.grad;
-        //     }
-        //     self.bias.data -= learning_rate * self.bias.grad;
-        // }
-
-        // /// Get the number of parameters
-        // pub fn num_parameters(self: *Self) usize {
-        //     return self.nin + 1; // weights + bias
-        // }
-
-        // /// Print neuron information
-        // pub fn print(self: *Self) void {
-        //     std.debug.print("Neuron({} inputs)\n", .{self.nin});
-        //     std.debug.print("  Weights: ");
-        //     for (self.weights, 0..) |weight, i| {
-        //         std.debug.print("w{}={any} ", .{ i, weight.data });
-        //     }
-        //     std.debug.print("\n  Bias: b={any}\n", .{self.bias.data});
-        // }
+        /// Print neuron information
+        pub fn print(self: *Self) void {
+            std.debug.print("Neuron({} inputs)\n", .{self.nin});
+            std.debug.print("  Weights: ");
+            for (self.weights, 0..) |weight, i| {
+                std.debug.print("w{}={any} ", .{ i, weight.data });
+            }
+            std.debug.print("\n  Bias: b={any}\n", .{self.bias.data});
+        }
 
         /// Forward pass through the neuron
         pub fn forward(self: *Self, inputs: []*ValueType) *ValueType {
@@ -114,15 +100,16 @@ pub fn Neuron(comptime T: type) type {
 
         /// Get all parameters (weights and bias) for optimization
         pub fn parameters(self: *Self) []*ValueType {
-            var list = std.ArrayList(*ValueType).init(arena.allocator());
-            defer list.deinit();
+            var params = arena.allocator().alloc(*ValueType, self.nin + 1) catch unreachable;
 
-            for (self.weights) |w| {
-                list.append(w) catch unreachable;
+            // Copy weights
+            for (self.weights, 0..) |weight, i| {
+                params[i] = weight;
             }
-            list.append(self.bias) catch unreachable;
 
-            return list.toOwnedSlice() catch unreachable;
+            // Add bias
+            params[self.nin] = self.bias;
+            return params;
         }
 
         /// Zero gradients for all parameters
@@ -200,7 +187,9 @@ pub fn Layer(comptime T: type) type {
             defer list.deinit();
 
             for (self.neurons) |neuron| {
-                list.append(neuron.parameters()) catch unreachable;
+                for (neuron.parameters()) |param| {
+                    list.append(param) catch unreachable;
+                }
             }
             return list.toOwnedSlice() catch unreachable;
         }
@@ -209,6 +198,13 @@ pub fn Layer(comptime T: type) type {
         pub fn zero_grad(self: *Self) void {
             for (self.neurons) |neuron| {
                 neuron.zero_grad();
+            }
+        }
+
+        /// Update parameters using gradient descent
+        pub fn update_parameters(self: *Self, learning_rate: T) void {
+            for (self.neurons) |neuron| {
+                neuron.update_parameters(learning_rate);
             }
         }
     };
@@ -273,7 +269,9 @@ pub fn MLP(comptime T: type) type {
             defer list.deinit();
 
             for (self.layers) |layer| {
-                list.append(layer.parameters()) catch unreachable;
+                for (layer.parameters()) |param| {
+                    list.append(param) catch unreachable;
+                }
             }
             return list.toOwnedSlice() catch unreachable;
         }
@@ -282,6 +280,13 @@ pub fn MLP(comptime T: type) type {
         pub fn zero_grad(self: *Self) void {
             for (self.layers) |layer| {
                 layer.zero_grad();
+            }
+        }
+
+        /// Update parameters using gradient descent
+        pub fn update_parameters(self: *Self, learning_rate: T) void {
+            for (self.layers) |layer| {
+                layer.update_parameters(learning_rate);
             }
         }
 
