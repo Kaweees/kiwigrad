@@ -83,20 +83,8 @@ pub fn Tensor(comptime T: type) type {
 
         const Expr = union(engine.ExprType) {
             nop: void,
-            unary: struct {
-                /// The unary operation that produced the value
-                op: engine.UnaryType,
-                backprop_fn: BackpropFn,
-                /// The children used to compute the value
-                prev: [1]*Self,
-            },
-            binary: struct {
-                /// The binary operation that produced the value
-                op: engine.BinaryType,
-                backprop_fn: BackpropFn,
-                /// The children used to compute the value
-                prev: [2]*Self,
-            },
+            unary: engine.UnaryOp(Self),
+            binary: engine.BinaryOp(Self),
         };
 
         /// The data

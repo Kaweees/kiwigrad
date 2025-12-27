@@ -23,10 +23,17 @@ pub const UnaryType = enum {
     }
 };
 
-// pub const UnaryOp = struct {
-//     type: UnaryType,
-//     func: fn (Scalar) Scalar,
-// };
+/// Unary operation structure
+pub fn UnaryOp(comptime ValueType: type) type {
+    return struct {
+        /// The unary operation that produced the value
+        op: UnaryType,
+        /// The backpropagation function
+        backprop_fn: *const fn (*ValueType) void,
+        /// The children used to compute the value
+        prev: [1]*ValueType,
+    };
+}
 
 pub const BinaryType = enum {
     add,
@@ -43,6 +50,18 @@ pub const BinaryType = enum {
         };
     }
 };
+
+/// Binary operation structure
+pub fn BinaryOp(comptime ValueType: type) type {
+    return struct {
+        /// The binary operation that produced the value
+        op: BinaryType,
+        /// The backpropagation function
+        backprop_fn: *const fn (*ValueType) void,
+        /// The children used to compute the value
+        prev: [2]*ValueType,
+    };
+}
 
 pub const Scalar = @import("scalar.zig").Scalar;
 pub const Array = @import("tensor.zig").Array;

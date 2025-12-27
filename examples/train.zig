@@ -28,7 +28,7 @@ pub fn main() !void {
 
     var sizes = [_]usize{ 3, 2, 1 };
 
-    // Initialize the neuron
+    // Initialize the neural network
     const mlp = MLPType.new(sizes.len - 1, sizes[0..]);
 
     const inputs = [_][3]*ValueType{
