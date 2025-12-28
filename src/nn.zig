@@ -4,6 +4,9 @@ const std = @import("std");
 const engine = @import("engine/engine.zig");
 const zprob = @import("zprob");
 
+/// Activation functions
+pub const ActivationType = engine.UnaryType;
+
 /// Represents a neuron with a configurable input size
 ///
 /// This is a generic type that can be used to create a neuron with configurable input size.
@@ -85,7 +88,7 @@ pub fn Neuron(comptime T: type) type {
         }
 
         /// Forward pass through the neuron
-        pub fn forward(self: *Self, inputs: []*ValueType) *ValueType {
+        pub fn forward(self: *Self, inputs: []*ValueType, activation: ActivationType) *ValueType {
             if (inputs.len != self.nin) {
                 std.debug.panic("Input size mismatch: {d} != {d}", .{ inputs.len, self.nin });
             }
@@ -94,8 +97,14 @@ pub fn Neuron(comptime T: type) type {
             for (self.weights, inputs) |w, x| {
                 sum = sum.add(w.mul(x));
             }
-            // Apply activation function (ReLU)
-            return sum.relu();
+            // Apply activation function
+            return switch (activation) {
+                .relu => sum.relu(),
+                .identity => sum.identity(),
+                .tanh => sum.tanh(),
+                .softmax => sum.softmax(),
+                else => std.debug.panic("Invalid activation function: {s}", .{@tagName(activation)}),
+            };
         }
 
         /// Get all parameters (weights and bias) for optimization
@@ -173,10 +182,10 @@ pub fn Layer(comptime T: type) type {
         }
 
         /// Forward pass through the layer
-        pub fn forward(self: *Self, inputs: []*ValueType) []*ValueType {
+        pub fn forward(self: *Self, inputs: []*ValueType, activation: ActivationType) []*ValueType {
             var list = arena.allocator().alloc(*ValueType, self.nout) catch unreachable;
             for (self.neurons, 0..) |neuron, i| {
-                list[i] = neuron.forward(inputs);
+                list[i] = neuron.forward(inputs, activation);
             }
             return list;
         }
@@ -257,8 +266,19 @@ pub fn MLP(comptime T: type) type {
         /// Forward pass through the layer
         pub fn forward(self: *Self, inputs: []*ValueType) []*ValueType {
             var current_inputs = inputs;
-            for (self.layers) |layer| {
-                current_inputs = layer.forward(current_inputs);
+            // Process all layers except the last one with tanh (ReLU can kill gradients)
+            for (self.layers[0 .. self.layers.len - 1]) |layer| {
+                current_inputs = layer.forward(current_inputs, ActivationType.tanh);
+            }
+            // Last layer: use linear activation for regression (no activation)
+            // For classification with multiple outputs, use softmax instead
+            const last_layer = self.layers[self.layers.len - 1];
+            if (last_layer.nout == 1) {
+                // Single output: use linear activation for regression
+                current_inputs = last_layer.forward(current_inputs, ActivationType.identity);
+            } else {
+                // Multiple outputs: use softmax for classification
+                current_inputs = last_layer.forward(current_inputs, ActivationType.softmax);
             }
             return current_inputs;
         }

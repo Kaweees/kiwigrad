@@ -24,6 +24,7 @@ const engine = @import("engine.zig");
 /// - Division
 /// - Rectified Linear Unit (ReLU)
 /// - Softmax
+/// - Tanh
 pub fn Scalar(comptime T: type) type {
     // Check that T is a valid type
     switch (@typeInfo(T)) {
@@ -176,6 +177,26 @@ pub fn Scalar(comptime T: type) type {
         /// Backpropagation function for softmax
         fn softmax_back(self: *Self) void {
             self.expr.unary.prev[0].grad += self.grad * std.math.exp(self.data);
+        }
+
+        /// Apply the tanh function to a Scalar
+        pub inline fn tanh(self: *Self) *Self {
+            return unary(std.math.tanh(self.data), .tanh, tanh_back, self);
+        }
+
+        /// Backpropagation function for tanh
+        fn tanh_back(self: *Self) void {
+            self.expr.unary.prev[0].grad += self.grad * (@as(T, 1) - self.data * self.data);
+        }
+
+        /// Identity function (passes value through, creates new node in graph)
+        pub inline fn identity(self: *Self) *Self {
+            return unary(self.data, .identity, identity_back, self);
+        }
+
+        /// Backpropagation function for identity
+        fn identity_back(self: *Self) void {
+            self.expr.unary.prev[0].grad += self.grad;
         }
 
         /// Generate Graphviz DOT format representation of the computational graph

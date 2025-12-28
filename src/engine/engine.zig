@@ -12,6 +12,7 @@ pub const UnaryType = enum {
     exp,
     relu,
     softmax,
+    identity,
 
     pub fn toString(self: UnaryType) []const u8 {
         return switch (self) {
@@ -19,6 +20,7 @@ pub const UnaryType = enum {
             .exp => "^",
             .relu => "ReLU",
             .softmax => "Softmax",
+            .identity => "id",
         };
     }
 };
